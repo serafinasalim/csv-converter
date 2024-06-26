@@ -22,8 +22,19 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
                 $tahun_terbit = $conn->real_escape_string($data[3]);
                 $penerbit = $conn->real_escape_string($data[4]);
 
-                $sql = "INSERT INTO buku (judul, penulis, genre, tahun_terbit, penerbit) VALUES ('$judul', '$penulis', '$genre', '$tahun_terbit', '$penerbit')";
-                $conn->query($sql);
+                // Check if the book already exists in the database
+                $check_sql = "SELECT * FROM buku WHERE judul = '$judul'";
+                $result = $conn->query($check_sql);
+
+                if ($result && $result->num_rows > 0) {
+                    // Update the existing record
+                    $update_sql = "UPDATE buku SET penulis = '$penulis', genre = '$genre', tahun_terbit = '$tahun_terbit', penerbit = '$penerbit' WHERE judul = '$judul'";
+                    $conn->query($update_sql);
+                } else {
+                    // Insert a new record
+                    $insert_sql = "INSERT INTO buku (judul, penulis, genre, tahun_terbit, penerbit) VALUES ('$judul', '$penulis', '$genre', '$tahun_terbit', '$penerbit')";
+                    $conn->query($insert_sql);
+                }
             }
             fclose($handle);
             $response = ['status' => 'success', 'message' => 'Import successful'];
